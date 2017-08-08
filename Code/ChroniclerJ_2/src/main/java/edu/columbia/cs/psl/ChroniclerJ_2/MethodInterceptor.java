@@ -6,6 +6,8 @@ import java.lang.reflect.Method;
 public class MethodInterceptor {
 	public static Object invoke(Method method, Object obj, Object... args)
 			throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+		//will delete return below
+				return args;
 		
 	}
 }

@@ -24,6 +24,7 @@ public class Main {
 			for (int i = 4; i < args.length; i++) {
                 instrumenterArgs[i] = args[i];
             }
+			Instrumenter._main(instrumenterArgs);
 		}
 		
 	}

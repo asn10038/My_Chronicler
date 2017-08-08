@@ -18,9 +18,8 @@ import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.util.CheckClassAdapter;
 import org.objectweb.asm.util.TraceClassVisitor;
 
-import edu.columbia.cs.psl.chroniclerj.replay.NonDeterministicReplayClassVisitor;
-import edu.columbia.cs.psl.chroniclerj.visitor.CallbackDuplicatingClassVisitor;
-import edu.columbia.cs.psl.chroniclerj.visitor.NonDeterministicLoggingClassVisitor;
+import edu.columbia.cs.psl.ChroniclerJ_2.visitor.CallbackDuplicatingClassVisitor;
+import edu.columbia.cs.psl.ChroniclerJ_2.visitor.NonDeterministicLoggingClassVisitor;
 
 //Contains definition of the class transformer
 public class PreMain {
@@ -42,7 +41,7 @@ public class PreMain {
 	static class ChroniclerTransformer implements ClassFileTransformer {
 		
 		@Override
-		//transforms one class into another
+		//does some instrumentation and some logging looking for callbacks...transforms one class into another
 		public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined, ProtectionDomain protectionDomain, byte[] classfileBuffer) throws IllegalClassFormatException {
 			// Instrumenter.loader = loader;
 			if (replay) {
@@ -100,9 +99,11 @@ public class PreMain {
 
 				try {
 					ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_MAXS);
+					//Does the non deterministic logging
 					NonDeterministicLoggingClassVisitor cv = new NonDeterministicLoggingClassVisitor(new SerialVersionUIDAdder(cw));
+					//Duplicates the callback classes and calls the Chronicler versions
 					CallbackDuplicatingClassVisitor callbackDuplicator = new CallbackDuplicatingClassVisitor(cv);
-
+					//ANOTHER ACCEPT CALL!!! -- calsl the callback duplicator visit methods
 					cr.accept(callbackDuplicator, ClassReader.EXPAND_FRAMES);
 					if (DEBUG) {
 						File f = new File("debug-record/" + className + ".class");
@@ -147,6 +148,8 @@ public class PreMain {
 					return null;
 				}
 			}
+			//added this quick fix because compiler was throwing error. this needs to be removed when replay is done
+			return classfileBuffer;
 		}
 	}
 	

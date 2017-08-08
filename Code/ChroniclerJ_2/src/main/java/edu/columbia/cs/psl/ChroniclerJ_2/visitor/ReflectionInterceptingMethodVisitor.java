@@ -21,6 +21,7 @@ public class ReflectionInterceptingMethodVisitor extends MethodVisitor {
 			opcode = Opcodes.INVOKESTATIC;
 			owner = "edu/columbia/cs/psl/ChroniclerJ_2/MethodInterceptor";
 			//call the method, but instead of running java.lang.reflect.Method.invoke run edu...Chronicler*.MethodInterceptor.invoke
+			//java code is like: Object MethodInterceptor.invoke(Method, Object, Object...)
 			super.visitMethodInsn(opcode, owner, "invoke",
 					"(Ljava/lang/reflect/Method;Ljava.lang/Object;[Ljava/lang/Object;)Ljava/lang/Object;",
 					false);

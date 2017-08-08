@@ -7,6 +7,12 @@ import org.apache.log4j.Logger;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.commons.AnalyzerAdapter;
+import org.objectweb.asm.commons.JSRInlinerAdapter;
+import org.objectweb.asm.commons.LocalVariablesSorter;
+
+import edu.columbia.cs.psl.ChroniclerJ_2.Constants;
+import edu.columbia.cs.psl.ChroniclerJ_2.Instrumenter;
 
 public class NonDeterministicLoggingClassVisitor extends ClassVisitor implements Opcodes {
 
@@ -65,6 +71,46 @@ public class NonDeterministicLoggingClassVisitor extends ClassVisitor implements
 	    	//TODO ask Jon about this comment 'need an annotation to disable doing this to some apps'
 	    	MethodVisitor primaryMV = cv.visitMethod(acc, name, desc, signature, exceptions);
 	    	//secondary method visitor
-	    	MethodVisitor smv = new RefelectionInterceptionMethodVisitor(primaryMV);
+	    	MethodVisitor smv = new ReflectionInterceptingMethodVisitor(primaryMV);
+	    	//ask Jon about redeclaring smv -- smv gets redefined to react according to what the class needs
+	    	smv = new FinalizerLoggingMethodVisitor(smv, name, desc, className);
+	    	if (name.equals("main") && desc.equals("[Ljava/lang/String;)V")) {
+	    		smv = new MainLoggingMethodVisitor(smv, acc, name, desc, className);
+	    	}
+	    	
+	    	if (Instrumenter.classIsCallBack(className, superName, interfaces)) {
+	    		AnalyzerAdapter analyzer = new AnalyzerAdapter(className, acc, name, desc, smv);
+	    		CloningAdviceAdapter caa = new CloningAdviceAdapter(analyzer, acc, name, desc, className, analyzer);
+	    		//This does some logging
+	    		smv = new CallbackLoggingMethodVisitor(caa, acc, name, desc, className,
+	                    null, caa, superName, interfaces);
+	    		smv = new JSRInlinerAdapter(smv, acc, name, desc, signature, exceptions);
+	    		//need to sort local variables before adding new local variables
+	    		smv = new LocalVariablesSorter(acc, desc, smv);
+	    		caa.setLocalVariableSorter((LocalVariablesSorter)smv);
+	    		
+	    	}
+	    	
+	    	//If it is a class an not an interface and not part of 
+	    	if (isAClass && !name.equals(Constants.INNER_COPY_METHOD_NAME)
+	    			&& !name.equals(Constants.OUTER_COPY_METHOD_NAME)
+	    			&& !name.equals(Constants.SET_FIELDS_METHOD_NAME)
+	    			&& !className.startsWith("com/thoughtworks")) {
+	    		//TODO ask jon about the use of Analyzer Adapter
+	    		AnalyzerAdapter analyzer = new AnalyzerAdapter(className, acc, name, desc, smv);
+	    		NonDeterministicLoggingMethodVisitor cloningMV = new NonDeterministicLoggingMethodVisitor(
+	    				analyzer, acc, name, desc, className, superName, isFirstConstructor, analyzer);
+	    		//this seems like a hack after realizing something about first constructors
+	    		if(name.equals("<init>"))
+	    			isFirstConstructor = false;
+	    		cloningMV.setClassVisitor(this);
+	    		//removes jump instructions and inlines them
+	    		JSRInlinerAdapter mv2 = new JSRInlinerAdapter(cloningMV, acc, name, desc, signature,
+	                    exceptions);
+	    		LocalVariablesSorter sorter = new LocalVariablesSorter(acc, desc, mv2);
+	    		cloningMV.setLocalVariableSorter(sorter);
+	    		return sorter;
+	    	} else // if name is one of the designated fields (in the process of copying methods or fields)
+	    		return smv;
 	    }
 }
