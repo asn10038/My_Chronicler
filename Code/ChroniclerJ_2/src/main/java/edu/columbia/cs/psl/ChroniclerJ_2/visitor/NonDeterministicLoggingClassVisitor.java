@@ -84,6 +84,7 @@ public class NonDeterministicLoggingClassVisitor extends ClassVisitor implements
 	    		//This does some logging
 	    		smv = new CallbackLoggingMethodVisitor(caa, acc, name, desc, className,
 	                    null, caa, superName, interfaces);
+	    		//remove jumps and inline instructions
 	    		smv = new JSRInlinerAdapter(smv, acc, name, desc, signature, exceptions);
 	    		//need to sort local variables before adding new local variables
 	    		smv = new LocalVariablesSorter(acc, desc, smv);
@@ -91,12 +92,12 @@ public class NonDeterministicLoggingClassVisitor extends ClassVisitor implements
 	    		
 	    	}
 	    	
-	    	//If it is a class an not an interface and not part of 
+	    	//If it is a class and not an interface and not part of Logging or replay
 	    	if (isAClass && !name.equals(Constants.INNER_COPY_METHOD_NAME)
 	    			&& !name.equals(Constants.OUTER_COPY_METHOD_NAME)
 	    			&& !name.equals(Constants.SET_FIELDS_METHOD_NAME)
 	    			&& !className.startsWith("com/thoughtworks")) {
-	    		//TODO ask jon about the use of Analyzer Adapter
+	    		//AnalyzerAdapter -- simulates the stack
 	    		AnalyzerAdapter analyzer = new AnalyzerAdapter(className, acc, name, desc, smv);
 	    		NonDeterministicLoggingMethodVisitor cloningMV = new NonDeterministicLoggingMethodVisitor(
 	    				analyzer, acc, name, desc, className, superName, isFirstConstructor, analyzer);

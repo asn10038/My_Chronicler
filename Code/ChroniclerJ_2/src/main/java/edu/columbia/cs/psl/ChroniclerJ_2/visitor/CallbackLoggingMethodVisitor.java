@@ -45,6 +45,7 @@ public class CallbackLoggingMethodVisitor extends InstructionAdapter implements 
     	if(isInit && opcode==INVOKESPECIAL && name.equals("<init>"))
     	{
     		onMethodEnter();
+    		//reset isInit
     		isInit = false;
     	}
     }
@@ -81,7 +82,7 @@ public class CallbackLoggingMethodVisitor extends InstructionAdapter implements 
         }
         return type;
     }
-    //TODO ask Jon bout this method. Seems like something to do with Autoboxing primitives
+    //TODO ask Jon bout this method. Seems like its calling the constructor
     public void box(final Type type) {
         if (type.getSort() == Type.OBJECT || type.getSort() == Type.ARRAY) {
             return;
@@ -133,6 +134,7 @@ public class CallbackLoggingMethodVisitor extends InstructionAdapter implements 
             super.visitMethodInsn(INVOKESPECIAL, Type.getInternalName(CallbackInvocation.class),
                     "<init>",
                     "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;[Ljava/lang/Object;Ljava/lang/Object;)V", false);
+            //log the value of the method you just called
             caa.logValueAtTopOfStackToArrayNoDup(Type.getInternalName(Log.class), "aLog",
                     "[Ljava/lang/Object;", Type.getType(Object.class), true, "callback\t"
                             + className + "." + methodName + methodDesc + "\t", false, true);

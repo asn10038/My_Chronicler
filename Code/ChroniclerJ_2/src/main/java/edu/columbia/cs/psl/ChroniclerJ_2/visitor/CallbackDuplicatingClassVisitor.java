@@ -48,7 +48,7 @@ public class CallbackDuplicatingClassVisitor extends ClassVisitor {
         if (Instrumenter.methodIsCallBack(className, name, desc, superName, interfaces)) {
         	//Log the callback method
             methodsToGenerateLogging.add(new MethodNode(access, name, desc, signature, exceptions));
-            //Rename only leave instruction for visiting the renamed method
+            //Rename original method so it won't be logged
             return super.visitMethod(access, "_chronicler_" + name, desc, signature, exceptions);
         }
         //if the method isn't a callback do nothing
@@ -58,11 +58,15 @@ public class CallbackDuplicatingClassVisitor extends ClassVisitor {
     @Override
     public void visitEnd() {
     	for (MethodNode mn : methodsToGenerateLogging) {
+    		//TODO ask Jon why he calls this
     		MethodVisitor mv = super.visitMethod(mn.access, mn.name, mn.desc, mn.signature,
                     (String[]) mn.exceptions.toArray(new String[0]));
+    		//Looks like it simulates the stack and the frame etc.
             AnalyzerAdapter analyzer = new AnalyzerAdapter(className, mn.access, mn.name, mn.desc, mv);
+            //Has the ability to make calls to the log methods
             CloningAdviceAdapter caa = new CloningAdviceAdapter(analyzer, mn.access,
                     mn.name, mn.desc, className, analyzer);
+            //sorts the variables so code can be instrumented
             LocalVariablesSorter lvsorter = new LocalVariablesSorter(mn.access, mn.desc, mv);
             CallbackLoggingMethodVisitor clmv = new CallbackLoggingMethodVisitor(mv,
                     mn.access, mn.name, mn.desc, className, lvsorter, caa, superName, interfaces);

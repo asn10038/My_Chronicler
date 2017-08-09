@@ -90,7 +90,7 @@ public class PreMain {
 					cr.accept(new ClassVisitor(Opcodes.ASM5, cw) {
 						@Override
 						public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
-							//TODO ask Jon what this is
+							//Delete code for jump instructions and inline them instead
 							return new JSRInlinerAdapter(super.visitMethod(access, name, desc, signature, exceptions), access, name, desc, signature, exceptions);
 						}
 					}, 0);
@@ -104,6 +104,8 @@ public class PreMain {
 					//Duplicates the callback classes and calls the Chronicler versions
 					CallbackDuplicatingClassVisitor callbackDuplicator = new CallbackDuplicatingClassVisitor(cv);
 					//ANOTHER ACCEPT CALL!!! -- calsl the callback duplicator visit methods
+					//The following line is important
+					//NOTE this is where he sets EXPAND_FRAMES configuration
 					cr.accept(callbackDuplicator, ClassReader.EXPAND_FRAMES);
 					if (DEBUG) {
 						File f = new File("debug-record/" + className + ".class");
@@ -114,6 +116,7 @@ public class PreMain {
 					}
 					cr = new ClassReader(cw.toByteArray());
 					CheckClassAdapter ca = new CheckClassAdapter(new ClassWriter(0));
+					//checks all instrumentation to make sure that all arguments match byte code method calls
 					cr.accept(ca, 0);
 					return cw.toByteArray();
 				} catch (Throwable t) {
@@ -148,6 +151,7 @@ public class PreMain {
 					return null;
 				}
 			}
+			//TODO ask Jon if this can be removed
 			//added this quick fix because compiler was throwing error. this needs to be removed when replay is done
 			return classfileBuffer;
 		}

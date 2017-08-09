@@ -76,7 +76,7 @@ public class CloningAdviceAdapter extends InstructionAdapter implements Opcodes 
 	    			t = elementType.getDescriptor();
     	}
     	super.visitLdcInsn(debug);
-    	//clever...if object type will call log(obj,string) else will call just string
+    	//clever...if object type will call log(obj,string) else will call log(prim,string)
     	//THIS TRIGGERS A CALL TO LOG THE OBJECT...I FINALLY FOUND ONE
     	super.visitMethodInsn(INVOKESTATIC, Type.getInternalName(Log.class), "log", "("+t+"Ljava/lang/String;)V", false);
     }

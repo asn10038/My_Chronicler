@@ -34,7 +34,6 @@ public class ChroniclerJExportRunner extends Thread {
     	System.arraycopy(args, 0, mainArgs, 0, args.length);    	
     }
     
-    //...there will be code here
     public static String nameOverride;
     public static void genTestCase() {
     	genTestCase("chroniclerj-crash-" + System.currentTimeMillis() + ".test");
@@ -53,12 +52,12 @@ public class ChroniclerJExportRunner extends Thread {
             	logFile.delete();
             Manifest manifest = new Manifest();
             manifest.getMainAttributes().put(Attributes.Name.MANIFEST_VERSION, "1.0");
-            //TODO Figure out why we need this
+            //points to method to run the replay
             manifest.getMainAttributes().put(Attributes.Name.MAIN_CLASS,
                     "edu.columbia.cs.psl.wallace.replay.ReplayRunner");
 
             JarOutputStream zos = new JarOutputStream(new FileOutputStream(logFile));
-
+            //writes info about main method
             JarEntry mainEntry = new JarEntry("main-info");
             zos.putNextEntry(mainEntry);
             zos.write(mainClass.getBytes());

@@ -44,7 +44,7 @@ public class NonDeterministicLoggingMethodVisitor
 	    	nonDeterministicMethods.add(owner + "." + name + ":" + desc);
 	    }
 	    
-	    //TODO ask Jon about AnalyzerAdapter (possible duplicate question)
+	    
 	    protected NonDeterministicLoggingMethodVisitor(MethodVisitor mv, int access, 
 	    		String name, String desc, String className, String superName, boolean isFirstConstructor, AnalyzerAdapter analyzer)
 	    {
