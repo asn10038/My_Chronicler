@@ -32,7 +32,7 @@ public class Instrumenter {
 	// this is the instrumenter class for ChroniclerJ
 	
 	//static variables
-	private static ClassLoader loader;
+	public static ClassLoader loader;
 	
 	private static Logger logger = Logger.getLogger(Instrumenter.class);
 	

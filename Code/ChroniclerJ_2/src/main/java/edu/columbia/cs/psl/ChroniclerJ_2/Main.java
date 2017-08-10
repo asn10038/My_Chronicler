@@ -1,6 +1,7 @@
 package edu.columbia.cs.psl.ChroniclerJ_2;
 
 import edu.columbia.cs.psl.ChroniclerJ_2.replay.ReplayRunner;
+import edu.columbia.cs.psl.ChroniclerJ_2.replay.Replayer;
 
 public class Main {
 	//this is the main method that gets called from the commnd line
@@ -27,6 +28,10 @@ public class Main {
                 instrumenterArgs[i] = args[i];
             }
 			Instrumenter._main(instrumenterArgs);
+			//trigger the replayer to run
+			Replayer._main(new String[] {
+                    args[1], args[3]
+            });
 		} else if (args[0].equals("-replay")) {
             if (args.length < 2) {
                 System.err

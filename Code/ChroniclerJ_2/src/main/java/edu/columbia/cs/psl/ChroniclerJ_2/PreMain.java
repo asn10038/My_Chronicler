@@ -18,6 +18,7 @@ import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.util.CheckClassAdapter;
 import org.objectweb.asm.util.TraceClassVisitor;
 
+import edu.columbia.cs.psl.ChroniclerJ_2.replay.NonDeterministicReplayClassVisitor;
 import edu.columbia.cs.psl.ChroniclerJ_2.visitor.CallbackDuplicatingClassVisitor;
 import edu.columbia.cs.psl.ChroniclerJ_2.visitor.NonDeterministicLoggingClassVisitor;
 
@@ -45,27 +46,27 @@ public class PreMain {
 		public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined, ProtectionDomain protectionDomain, byte[] classfileBuffer) throws IllegalClassFormatException {
 			// Instrumenter.loader = loader;
 			if (replay) {
-//				try {
-//					ClassReader cr = new ClassReader(classfileBuffer);
-//					if (isIgnoredClass(cr.getClassName()))
-//						return null;
-//					if (DEBUG)
-//						System.out.println("Inst: " + cr.getClassName());
-//					ClassWriter cw = new ClassWriter(cr, ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);
-//					NonDeterministicReplayClassVisitor cv = new NonDeterministicReplayClassVisitor(Opcodes.ASM5, cw);
-//					cr.accept(cv, ClassReader.EXPAND_FRAMES);
-//					if (DEBUG) {
-//						File f = new File("debug-replay/" + className + ".class");
-//						f.getParentFile().mkdirs();
-//						FileOutputStream fos = new FileOutputStream(f);
-//						fos.write(cw.toByteArray());
-//						fos.close();
-//					}
-//					return cw.toByteArray();
-//				} catch (Throwable t) {
-//					t.printStackTrace();
-//					return null;
-//				}
+				try {
+					ClassReader cr = new ClassReader(classfileBuffer);
+					if (isIgnoredClass(cr.getClassName()))
+						return null;
+					if (DEBUG)
+						System.out.println("Inst: " + cr.getClassName());
+					ClassWriter cw = new ClassWriter(cr, ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);
+					NonDeterministicReplayClassVisitor cv = new NonDeterministicReplayClassVisitor(Opcodes.ASM5, cw);
+					cr.accept(cv, ClassReader.EXPAND_FRAMES);
+					if (DEBUG) {
+						File f = new File("debug-replay/" + className + ".class");
+						f.getParentFile().mkdirs();
+						FileOutputStream fos = new FileOutputStream(f);
+						fos.write(cw.toByteArray());
+						fos.close();
+					}
+					return cw.toByteArray();
+				} catch (Throwable t) {
+					t.printStackTrace();
+					return null;
+				}
 			} else {
 				ClassReader cr = new ClassReader(classfileBuffer);
 				className = cr.getClassName();
@@ -151,9 +152,7 @@ public class PreMain {
 					return null;
 				}
 			}
-			//TODO ask Jon if this can be removed
-			//added this quick fix because compiler was throwing error. this needs to be removed when replay is done
-			return classfileBuffer;
+
 		}
 	}
 	

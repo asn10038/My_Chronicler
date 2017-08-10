@@ -4,6 +4,8 @@ package edu.columbia.cs.psl.ChroniclerJ_2;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import edu.columbia.cs.psl.ChroniclerJ_2.replay.ReplayUtils;
+
 /* Log should be thought of as a verb not a noun in this case. This class contains all the 
  * methods that put data in the log Serializable log class. Keep in mind each data type has
  * its own log method

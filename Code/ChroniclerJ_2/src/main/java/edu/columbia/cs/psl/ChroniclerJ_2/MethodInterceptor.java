@@ -5,6 +5,8 @@ import java.lang.reflect.Method;
 
 import org.objectweb.asm.Type;
 
+import edu.columbia.cs.psl.ChroniclerJ_2.replay.ReplayRunner;
+import edu.columbia.cs.psl.ChroniclerJ_2.replay.ReplayUtils;
 import edu.columbia.cs.psl.ChroniclerJ_2.visitor.NonDeterministicLoggingMethodVisitor;
 
 public class MethodInterceptor {
@@ -34,37 +36,36 @@ public class MethodInterceptor {
                 for (int i = 0; i < args.length; i++) {
                     if (args[i] != null && args[i].getClass().isArray())
                     {
-//                        args[i] = replay();
+                        args[i] = replay();
                     }
                 }
-//            Object ret = replay();
-//            return ret;
-              //ant edit to remove comp error...remove after replay is copied over
-              return null;
+            Object ret = replay();
+            return ret;
+
         } else
             return method.invoke(obj, args);
     }
 
-//    private static Object replay() {
-//        Log.logLock.lock();
-//
-//        int i = ReplayUtils.getNextIndexO(ExportedLog.aLog_replayIndex, ExportedLog.aLog_owners,
-//                ExportedLog.aLog_fill,
-//                ExportedLog.aLog);
-//        if (i < 0) {
-//            ReplayRunner.loadNextLog("edu/columbia/cs/psl/chroniclerj/ExportedLog");
-//            return replay();
-//        }
-//        Object ret = ExportedLog.aLog[i];
-//
-//        ReplayUtils.getNextIndexO(ExportedLog.aLog_replayIndex, ExportedLog.aLog_owners,
-//                ExportedLog.aLog_fill,
-//                ExportedLog.aLog);
-//        ExportedLog.aLog_replayIndex.put(Thread.currentThread().getName(), i + 1);
-//        ExportedLog.globalReplayIndex++;
-//        Log.logLock.unlock();
-//        return ret;
-//    }
+    private static Object replay() {
+        Log.logLock.lock();
+
+        int i = ReplayUtils.getNextIndexO(ExportedLog.aLog_replayIndex, ExportedLog.aLog_owners,
+                ExportedLog.aLog_fill,
+                ExportedLog.aLog);
+        if (i < 0) {
+            ReplayRunner.loadNextLog("edu/columbia/cs/psl/chroniclerj/ExportedLog");
+            return replay();
+        }
+        Object ret = ExportedLog.aLog[i];
+
+        ReplayUtils.getNextIndexO(ExportedLog.aLog_replayIndex, ExportedLog.aLog_owners,
+                ExportedLog.aLog_fill,
+                ExportedLog.aLog);
+        ExportedLog.aLog_replayIndex.put(Thread.currentThread().getName(), i + 1);
+        ExportedLog.globalReplayIndex++;
+        Log.logLock.unlock();
+        return ret;
+    }
 
     private static void log(Object obj) {
         Log.logLock.lock();
